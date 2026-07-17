@@ -2,13 +2,12 @@
 
 A small website for [TIL notes](https://github.com/desertthunder/til)
 
-## Submodule setup
+## Content source
 
-The content repository is meant to be tracked as a Git submodule at `til`:
+The preferred content source is the `til` Git submodule. Initialize it after cloning:
 
 ```sh
-git submodule add https://github.com/desertthunder/til.git til
 git submodule update --init --recursive
 ```
 
-Until the submodule is initialized, the site builds as an empty archive.
+If the submodule is unavailable, the build retrieves dated Markdown notes from the public GitHub API. That fallback requires internet access at build time.

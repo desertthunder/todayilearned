@@ -5,9 +5,7 @@ html {
 
 body {
 	min-height: 100vh;
-	background:
-		linear-gradient(135deg, color-mix(in srgb, var(--color-accent-soft) 48%, transparent), transparent 34rem),
-		var(--color-bg);
+	background: var(--color-bg);
 	color: var(--color-text);
 	font-family: var(--font-serif);
 	font-size: var(--text-base);
