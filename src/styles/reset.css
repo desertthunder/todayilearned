@@ -1,0 +1,50 @@
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	min-width: 20rem;
+	scroll-behavior: smooth;
+}
+
+body,
+h1,
+h2,
+h3,
+p,
+ol,
+ul,
+dl,
+dd,
+figure,
+blockquote,
+pre {
+	margin: 0;
+}
+
+ol,
+ul {
+	padding: 0;
+}
+
+img,
+svg,
+video,
+canvas {
+	display: block;
+	max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+}
+
+button,
+select {
+	color: inherit;
+}
