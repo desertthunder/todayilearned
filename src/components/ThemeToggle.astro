@@ -1,0 +1,162 @@
+---
+const themes = [
+	{ value: "cyberdream", label: "Cyberdream", swatches: ["#16181a", "#5ef1ff", "#ff5ef1"] },
+	{ value: "eldritch", label: "Eldritch", swatches: ["#212337", "#37f499", "#04d1f9"] },
+	{ value: "iceberg", label: "Iceberg", swatches: ["#161821", "#84a0c6", "#a093c7"] },
+	{ value: "oxocarbon", label: "Oxocarbon", swatches: ["#161616", "#78a9ff", "#42be65"] },
+	{ value: "spaceduck", label: "Spaceduck", swatches: ["#0f111b", "#00a3cc", "#b3a1e6"] },
+	{ value: "thorn", label: "Thorn", swatches: ["#172526", "#87cbb1", "#ffd7aa"] },
+	{ value: "dune", label: "Dune", swatches: ["#f4ead4", "#a64b24", "#b98c42"] },
+];
+---
+
+<div class="theme-switcher" data-theme-switcher>
+	<label class="theme-switcher__label" for="site-theme">Theme</label>
+	<div class="theme-switcher__control">
+		<span class="theme-switcher__swatches" aria-hidden="true">
+			{themes[0].swatches.map((swatch) => <span class="theme-switcher__swatch" style={`--swatch: ${swatch}`} />)}
+		</span>
+		<select id="site-theme" name="theme" data-theme-select>
+			{themes.map((theme) => <option value={theme.value}>{theme.label}</option>)}
+		</select>
+	</div>
+</div>
+
+<script>
+	type Theme = "cyberdream" | "eldritch" | "iceberg" | "oxocarbon" | "spaceduck" | "thorn" | "dune";
+
+	const storageKey = "til-theme";
+	const defaultTheme: Theme = "cyberdream";
+	const themeSwatches: Record<Theme, string[]> = {
+		cyberdream: ["#16181a", "#5ef1ff", "#ff5ef1"],
+		eldritch: ["#212337", "#37f499", "#04d1f9"],
+		iceberg: ["#161821", "#84a0c6", "#a093c7"],
+		oxocarbon: ["#161616", "#78a9ff", "#42be65"],
+		spaceduck: ["#0f111b", "#00a3cc", "#b3a1e6"],
+		thorn: ["#172526", "#87cbb1", "#ffd7aa"],
+		dune: ["#f4ead4", "#a64b24", "#b98c42"],
+	};
+
+	const root = document.documentElement;
+	const themeSelect = document.querySelector("[data-theme-select]");
+	const swatchWrap = document.querySelector("[data-theme-switcher] .theme-switcher__swatches");
+
+	function isTheme(value: string | undefined): value is Theme {
+		return value !== undefined && value in themeSwatches;
+	}
+
+	function updateSwatches(theme: Theme) {
+		if (!swatchWrap) return;
+
+		swatchWrap.replaceChildren(
+			...themeSwatches[theme].map((swatch) => {
+				const item = document.createElement("span");
+				item.className = "theme-switcher__swatch";
+				item.style.setProperty("--swatch", swatch);
+				return item;
+			}),
+		);
+	}
+
+	function applyTheme(theme: Theme) {
+		root.dataset.theme = theme;
+		updateSwatches(theme);
+
+		try {
+			localStorage.setItem(storageKey, theme);
+		} catch {}
+	}
+
+	if (themeSelect instanceof HTMLSelectElement) {
+		const currentTheme = isTheme(root.dataset.theme) ? root.dataset.theme : defaultTheme;
+		themeSelect.value = currentTheme;
+		updateSwatches(currentTheme);
+
+		themeSelect.addEventListener("change", () => {
+			applyTheme(isTheme(themeSelect.value) ? themeSelect.value : defaultTheme);
+		});
+	}
+</script>
+
+<style is:global>
+	.theme-switcher {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-width: 0;
+		font-family: var(--font-sans);
+		padding: var(--space-2) var(--space-4);
+	}
+
+	.theme-switcher__label {
+		color: var(--color-muted);
+		font-size: 0.64rem;
+		font-weight: 500;
+		letter-spacing: var(--tracking-caps);
+		text-transform: uppercase;
+	}
+
+	.theme-switcher__control {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		height: 2.25rem;
+		min-width: 10.2rem;
+		padding: 0 var(--space-2);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		transition: border-color var(--transition-fast);
+	}
+
+	.theme-switcher__control:hover,
+	.theme-switcher__control:focus-within {
+		border-color: var(--color-accent);
+	}
+
+	.theme-switcher__swatches {
+		display: inline-flex;
+		flex: 0 0 auto;
+		isolation: isolate;
+	}
+
+	.theme-switcher__swatch {
+		width: 0.7rem;
+		height: 0.7rem;
+		border: 1px solid color-mix(in srgb, var(--color-text) 36%, transparent);
+		border-radius: 50%;
+		background: var(--swatch);
+	}
+
+	.theme-switcher__swatch + .theme-switcher__swatch {
+		margin-left: -0.18rem;
+	}
+
+	.theme-switcher select {
+		min-width: 0;
+		flex: 1 1 auto;
+		height: 100%;
+		padding: 0 1.1rem 0 0;
+		border: 0;
+		appearance: none;
+		background:
+			linear-gradient(45deg, transparent 50%, currentColor 50%) calc(100% - 0.54rem) 50% / 0.3rem 0.3rem no-repeat,
+			linear-gradient(135deg, currentColor 50%, transparent 50%) calc(100% - 0.34rem) 50% / 0.3rem 0.3rem no-repeat;
+		color: var(--color-text);
+		cursor: pointer;
+		font-size: var(--text-xs);
+		font-weight: 500;
+		outline: 0;
+	}
+
+	@media (max-width: 32rem) {
+		.theme-switcher__label,
+		.theme-switcher__swatches {
+			display: none;
+		}
+
+		.theme-switcher__control {
+			min-width: 8.5rem;
+		}
+	}
+</style>

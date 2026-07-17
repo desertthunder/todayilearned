@@ -1,0 +1,81 @@
+---
+import type { NoteEntry } from "../lib/til";
+import { dateFromId, formatDate, sourceHrefFor } from "../lib/til";
+import TagList from "./TagList.astro";
+
+interface Props {
+	entry: NoteEntry;
+}
+
+const { entry } = Astro.props;
+const date = dateFromId(entry.id)!;
+---
+
+<dl class="entry-meta">
+	<div class="entry-meta__row">
+		<dt>Filed</dt>
+		<dd><time datetime={date.toISOString()}>{formatDate(date)}</time></dd>
+	</div>
+	<div class="entry-meta__row">
+		<dt>Path</dt>
+		<dd class="entry-meta__path">
+			<a href={sourceHrefFor(entry)} rel="noreferrer">
+				{entry.id}
+			</a>
+		</dd>
+	</div>
+	{
+		entry.data.tags.length > 0 && (
+			<div class="entry-meta__row">
+				<dt>Topics</dt>
+				<dd>
+					<TagList tags={entry.data.tags} />
+				</dd>
+			</div>
+		)
+	}
+</dl>
+
+<style>
+	.entry-meta {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+		gap: var(--space-5) var(--space-6);
+		font-family: var(--font-sans);
+		font-size: var(--text-sm);
+	}
+
+	.entry-meta__row {
+		display: grid;
+		gap: var(--space-1);
+	}
+
+	.entry-meta dt {
+		color: var(--color-muted);
+		font-size: 0.63rem;
+		font-weight: 500;
+		letter-spacing: var(--tracking-caps);
+		text-transform: uppercase;
+	}
+
+	.entry-meta dd {
+		min-width: 0;
+	}
+
+	.entry-meta :global(.tag-list) {
+		margin-top: var(--space-1);
+	}
+
+	.entry-meta__path {
+		color: var(--color-muted);
+		font-size: var(--text-xs);
+		line-height: 1.45;
+		overflow-wrap: anywhere;
+		font-family: var(--font-mono);
+	}
+
+	.entry-meta a {
+		color: var(--color-text);
+		font-weight: 500;
+	}
+</style>

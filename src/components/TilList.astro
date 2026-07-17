@@ -1,0 +1,102 @@
+---
+import type { NoteEntry } from "../lib/til";
+import { dateFromId, excerptFor, formatDate, hrefFor } from "../lib/til";
+
+interface Props {
+	entries: NoteEntry[];
+}
+
+const { entries } = Astro.props;
+---
+
+{
+	entries.length > 0 ? (
+		<ol class="til-list">
+			{entries.map((entry) => {
+				const date = dateFromId(entry.id)!;
+				const excerpt = excerptFor(entry);
+				const topics = entry.data.tags.join(", ");
+
+				return (
+					<li class="til-list__item">
+						<article class="til-card">
+							<div class="til-card__body">
+								<p class="til-card__meta">
+									<time datetime={date.toISOString()}>{formatDate(date)}</time>
+									{topics && (
+										<>
+											<span aria-hidden="true"> / </span>
+											{topics}
+										</>
+									)}
+								</p>
+								<h2 class="til-card__title">
+									<a href={hrefFor(entry)}>{entry.data.title}</a>
+								</h2>
+								{excerpt && <p class="til-card__excerpt">{excerpt}</p>}
+							</div>
+						</article>
+					</li>
+				);
+			})}
+		</ol>
+	) : (
+		<p class="archive-empty">The archive is waiting for its first field note.</p>
+	)
+}
+
+<style>
+	.til-list {
+		list-style: none;
+	}
+
+	.til-list__item {
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.til-card {
+		padding-block: var(--space-5);
+	}
+
+	.til-card__body {
+		min-width: 0;
+	}
+
+	.til-card__meta {
+		color: var(--color-muted);
+		font-family: var(--font-sans);
+		font-size: var(--text-xs);
+		font-weight: 500;
+		letter-spacing: 0.03em;
+		line-height: 1.4;
+	}
+
+	.til-card__title {
+		margin-top: var(--space-1);
+		font-size: clamp(1.35rem, 2.4vw, 1.65rem);
+		font-weight: 500;
+		letter-spacing: -0.035em;
+		line-height: 1.15;
+	}
+
+	.til-card__title a {
+		text-decoration: none;
+	}
+
+	.til-card:hover .til-card__title a {
+		color: var(--color-accent);
+	}
+
+	.til-card__excerpt {
+		margin-top: var(--space-2);
+		color: var(--color-muted);
+		font-size: var(--text-base);
+		line-height: 1.58;
+	}
+
+	.archive-empty {
+		padding: var(--space-5) 0;
+		border-bottom: 1px solid var(--color-border);
+		color: var(--color-muted);
+	}
+</style>

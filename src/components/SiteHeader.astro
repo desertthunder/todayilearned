@@ -1,0 +1,87 @@
+---
+import { META } from "../lib/meta";
+import type { NoteEntry } from "../lib/til";
+import NotebookIndex from "./NotebookIndex.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+
+type Props = { entries: NoteEntry[]; currentId?: string };
+
+const { entries, currentId } = Astro.props;
+---
+
+<header class="site-header">
+	<div class="site-header__brand">
+		<span>
+			<a class="site-header__eyebrow" href="https://desertthunder.dev" target="_blank" aria-label="my website">
+				{META.NAME}
+			</a>
+			<a href="/" aria-label="Today I Learned home" class="site-header__name">
+				{META.TITLE}
+			</a>
+		</span>
+	</div>
+	<p class="site-header__description">{META.DESCRIPTION}</p>
+	<ThemeToggle />
+	<NotebookIndex entries={entries} currentId={currentId} />
+</header>
+
+<style>
+	.site-header {
+		display: grid;
+		gap: var(--space-5);
+		font-family: var(--font-sans);
+	}
+
+	.site-header__brand {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-3);
+		color: var(--color-text);
+		font-family: var(--font-sans);
+		line-height: 1.1;
+		text-decoration: none;
+		padding: var(--space-4);
+	}
+
+	.site-header__brand:hover {
+		color: var(--color-text);
+	}
+
+	.site-header__eyebrow,
+	.site-header__name {
+		display: block;
+	}
+
+	.site-header__eyebrow {
+		margin-bottom: 0.13rem;
+		color: var(--color-muted);
+		font-size: 0.6rem;
+		font-weight: 500;
+		letter-spacing: var(--tracking-caps);
+		text-transform: uppercase;
+	}
+
+	.site-header__name {
+		font-family: var(--font-serif);
+		font-size: var(--text-lg);
+		font-weight: 500;
+		letter-spacing: -0.0125em;
+	}
+
+	.site-header__description {
+		max-width: 23rem;
+		color: var(--color-muted);
+		font-size: var(--text-sm);
+		line-height: 1.5;
+		padding: var(--space-2) var(--space-4);
+	}
+
+	.site-header :global(.theme-switcher) {
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	.site-header :global(.theme-switcher__control) {
+		flex: 1 1 auto;
+	}
+</style>

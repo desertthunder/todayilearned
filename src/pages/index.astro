@@ -1,17 +1,53 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TilList from "../components/TilList.astro";
+import { getNotes } from "../lib/til";
 
+const entries = await getNotes();
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout description="Small field notes about things worth remembering.">
+	<div class="archive-page">
+		<header class="archive-page__header">
+			<h1>Recent notes</h1>
+			<p class="archive-page__lede">
+				Small, dated notes about useful things worth remembering. {entries.length}{" "}
+				{entries.length === 1 ? "note" : "notes"} so far.
+			</p>
+		</header>
+
+		<section class="archive-section" id="latest" aria-label="Recent notes">
+			<TilList entries={entries} />
+		</section>
+	</div>
+</BaseLayout>
+
+<style>
+	.archive-page {
+		max-width: 80ch;
+	}
+
+	.archive-page__header {
+		padding-bottom: var(--space-8);
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.archive-page__header h1 {
+		margin-top: var(--space-3);
+		font-size: clamp(2.4rem, 5vw, 3.6rem);
+		font-weight: 400;
+		letter-spacing: -0.05em;
+		line-height: 1;
+	}
+
+	.archive-page__lede {
+		margin-top: var(--space-4);
+		color: var(--color-muted);
+		font-size: var(--text-base);
+		line-height: 1.55;
+	}
+
+	.archive-section {
+		padding-top: var(--space-8);
+	}
+</style>

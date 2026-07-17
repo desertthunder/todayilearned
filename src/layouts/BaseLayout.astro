@@ -1,0 +1,102 @@
+---
+import "../styles/style.css";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import { getNotes } from "../lib/til";
+
+interface Props {
+	title?: string;
+	description?: string;
+	currentId?: string;
+}
+
+const {
+	title = "Today I Learned",
+	description = "Small field notes about things worth remembering.",
+	currentId,
+} = Astro.props;
+const pageTitle = title === "Today I Learned" ? title : `${title} · Today I Learned`;
+const entries = await getNotes();
+---
+
+<!doctype html>
+<html lang="en" data-theme="cyberdream">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={description} />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<title>{pageTitle}</title>
+		<script is:inline>
+			try {
+				const themes = ["cyberdream", "eldritch", "iceberg", "oxocarbon", "spaceduck", "thorn", "dune"];
+				const savedTheme = localStorage.getItem("til-theme");
+				if (themes.includes(savedTheme)) document.documentElement.dataset.theme = savedTheme;
+			} catch {}
+		</script>
+	</head>
+	<body>
+		<a class="skip-link" href="#content">Skip to content</a>
+		<div class="site-frame">
+			<div class="site-rail">
+				<SiteHeader entries={entries} currentId={currentId} />
+				<SiteFooter />
+			</div>
+			<main class="site-main" id="content">
+				<slot />
+			</main>
+		</div>
+	</body>
+</html>
+
+<style>
+	.site-frame {
+		--site-rail-width: min(40vw, 25rem);
+		--site-main-gutter: clamp(var(--space-6), 5vw, var(--space-16));
+
+		min-height: 100vh;
+		display: grid;
+		grid-template-areas:
+			"main"
+			"rail";
+	}
+
+	.site-main {
+		grid-area: main;
+		min-width: 0;
+		padding: var(--space-12);
+	}
+
+	.site-rail {
+		grid-area: rail;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-10);
+		border-top: 1px solid var(--color-border);
+	}
+
+	@media (min-width: 60rem) {
+		.site-frame {
+			display: block;
+		}
+
+		.site-rail {
+			position: fixed;
+			inset: 0 auto 0 0;
+			z-index: 1;
+			width: var(--site-rail-width);
+			gap: var(--space-8);
+			border-top: 0;
+			border-right: 1px solid var(--color-border);
+			overflow-y: auto;
+		}
+
+		.site-main {
+			width: min(calc(100vw - var(--site-rail-width)), calc(80ch + 2 * var(--site-main-gutter)));
+			margin-left: var(--site-rail-width);
+			padding-block: var(--space-12);
+		}
+	}
+</style>

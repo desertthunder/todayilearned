@@ -1,0 +1,118 @@
+---
+import type { NoteEntry } from "../lib/til";
+import { dateFromId, formatDate, hrefFor } from "../lib/til";
+
+type Props = { entries: NoteEntry[]; currentId?: string };
+
+const { entries, currentId } = Astro.props;
+---
+
+<nav class="site-index" aria-label="Notebook index">
+	<p class="site-index__heading">
+		<span>Notebook</span>
+		<span>{entries.length}</span>
+	</p>
+	{
+		entries.length > 0 ? (
+			<ol class="site-index__list">
+				{entries.map((entry) => {
+					const date = dateFromId(entry.id)!;
+					const topics = entry.data.tags.join(", ");
+
+					return (
+						<li>
+							<a
+								class="site-index__link"
+								href={hrefFor(entry)}
+								aria-current={entry.id === currentId ? "page" : undefined}>
+								<span class="site-index__meta">
+									<time datetime={date.toISOString()}>{formatDate(date, { year: undefined })}</time>
+									{topics && (
+										<>
+											<span aria-hidden="true"> / </span>
+											{topics}
+										</>
+									)}
+								</span>
+								<span class="site-index__title">{entry.data.title}</span>
+							</a>
+						</li>
+					);
+				})}
+			</ol>
+		) : (
+			<p class="site-index__empty">The notebook is waiting for its first note.</p>
+		)
+	}
+</nav>
+
+<style>
+	.site-index {
+		border-top: 1px solid var(--color-border);
+	}
+
+	.site-index__heading {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-3);
+		padding: var(--space-4);
+		color: var(--color-muted);
+		font-family: var(--font-sans);
+		font-size: 0.64rem;
+		font-weight: 500;
+		letter-spacing: var(--tracking-caps);
+		text-transform: uppercase;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+	}
+
+	.site-index__list {
+		list-style: none;
+	}
+
+	.site-index__link {
+		display: block;
+		padding: var(--space-4);
+		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+		text-decoration: none;
+	}
+
+	.site-index__link:hover,
+	.site-index__link[aria-current="page"] {
+		color: var(--color-accent);
+		background: var(--color-selection);
+	}
+
+	.site-index__link[aria-current="page"] {
+		padding-left: var(--space-2);
+		border-left: 2px solid var(--color-accent);
+	}
+
+	.site-index__meta,
+	.site-index__title {
+		display: block;
+	}
+
+	.site-index__meta {
+		color: var(--color-muted);
+		font-family: var(--font-sans);
+		font-size: 0.65rem;
+		font-weight: 500;
+		letter-spacing: 0.03em;
+		line-height: 1.35;
+	}
+
+	.site-index__title {
+		margin-top: 0.08rem;
+		font-family: var(--font-serif);
+		font-size: var(--text-sm);
+		line-height: 1.25;
+	}
+
+	.site-index__empty {
+		padding-block: var(--space-3);
+		color: var(--color-muted);
+		font-family: var(--font-sans);
+		font-size: var(--text-sm);
+		line-height: 1.5;
+	}
+</style>
