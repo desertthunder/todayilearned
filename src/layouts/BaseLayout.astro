@@ -3,6 +3,7 @@ import "../styles/style.css";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import { META } from "../lib/meta";
+import { STANDARD_SITE_PUBLICATION_URI, standardSiteDocumentUri } from "../lib/standard-site.mjs";
 import { getNotes } from "../lib/til";
 
 type Props = { title?: string; description?: string; currentId?: string };
@@ -12,6 +13,7 @@ const pageTitle = title === "Today I Learned" ? title : `${title} · Today I Lea
 const entries = await getNotes();
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? META.SITE_URL);
 const ogImageUrl = new URL("/og.png", Astro.site ?? META.SITE_URL);
+const standardSiteDocumentUrl = currentId ? standardSiteDocumentUri(currentId) : undefined;
 ---
 
 <!doctype html>
@@ -22,6 +24,8 @@ const ogImageUrl = new URL("/og.png", Astro.site ?? META.SITE_URL);
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="canonical" href={canonicalUrl} />
+		<link rel="site.standard.publication" href={STANDARD_SITE_PUBLICATION_URI} />
+		{standardSiteDocumentUrl && <link rel="site.standard.document" href={standardSiteDocumentUrl} />}
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content={META.TITLE} />
 		<meta property="og:title" content={pageTitle} />

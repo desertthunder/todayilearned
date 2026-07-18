@@ -8,8 +8,11 @@
 	"scripts": {
 		"dev": "astro dev",
 		"build": "astro build && pagefind --site dist",
+		"deploy": "pnpm build && wrangler pages deploy dist && pnpm sync",
 		"preview": "astro preview",
 		"check": "astro check",
+		"sync": "node --env-file-if-exists=.env tools/sync/index.mjs",
+		"test": "node --test",
 		"astro": "astro"
 	},
 	"dependencies": {
