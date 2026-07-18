@@ -11,3 +11,7 @@ git submodule update --init --recursive
 ```
 
 If the submodule is unavailable, the build retrieves dated Markdown notes from the public GitHub API. That fallback requires internet access at build time.
+
+## Credits
+
+Inspired by [jake lazaroff](https://til.jakelazaroff.com/)
