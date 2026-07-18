@@ -1,17 +1,22 @@
 html {
 	background: var(--color-bg);
 	color: var(--color-text);
+	-webkit-font-smoothing: antialiased;
 }
 
 body {
 	min-height: 100vh;
 	background: var(--color-bg);
 	color: var(--color-text);
-	font-family: var(--font-serif);
+	font-family: var(--font-sans);
 	font-size: var(--text-base);
 	font-weight: 400;
 	line-height: var(--leading-body);
 	text-rendering: optimizeLegibility;
+}
+
+p {
+	text-wrap: pretty;
 }
 
 ::selection {
@@ -53,7 +58,7 @@ a:hover {
 code,
 kbd,
 samp {
-	font-family: var(--font-sans);
+	font-family: var(--font-mono);
 	font-size: 0.88em;
 	font-variant-numeric: tabular-nums;
 }

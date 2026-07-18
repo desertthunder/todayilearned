@@ -6,14 +6,19 @@ import { getNotes } from "../lib/til";
 const entries = await getNotes();
 ---
 
-<BaseLayout description="Small field notes about things worth remembering.">
+<BaseLayout>
 	<div class="archive-page">
 		<header class="archive-page__header">
-			<h1>Recent notes</h1>
-			<p class="archive-page__lede">
-				Small, dated notes about useful things worth remembering. {entries.length}{" "}
-				{entries.length === 1 ? "note" : "notes"} so far.
-			</p>
+			<h1>Recent Notes</h1>
+			<div class="archive-page__lede">
+				<p>
+					TIL - <a href="https://www.reddit.com/r/todayilearned/">Today I Learned</a>
+				</p>
+				<p>Small, short, daily notes.</p>
+				<span>
+					total: {entries.length}&nbsp;{entries.length === 1 ? "note" : "notes"}
+				</span>
+			</div>
 		</header>
 
 		<section class="archive-section" id="latest" aria-label="Recent notes">
@@ -35,12 +40,15 @@ const entries = await getNotes();
 	.archive-page__header h1 {
 		margin-top: var(--space-3);
 		font-size: clamp(2.4rem, 5vw, 3.6rem);
-		font-weight: 400;
-		letter-spacing: -0.05em;
+		font-weight: 500;
+		letter-spacing: -0.025em;
 		line-height: 1;
 	}
 
 	.archive-page__lede {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
 		margin-top: var(--space-4);
 		color: var(--color-muted);
 		font-size: var(--text-base);

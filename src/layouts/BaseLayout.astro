@@ -2,21 +2,16 @@
 import "../styles/style.css";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
+import { META } from "../lib/meta";
 import { getNotes } from "../lib/til";
 
-interface Props {
-	title?: string;
-	description?: string;
-	currentId?: string;
-}
+type Props = { title?: string; description?: string; currentId?: string };
 
-const {
-	title = "Today I Learned",
-	description = "Small field notes about things worth remembering.",
-	currentId,
-} = Astro.props;
+const { title = META.TITLE, description = META.DESCRIPTION, currentId } = Astro.props;
 const pageTitle = title === "Today I Learned" ? title : `${title} · Today I Learned`;
 const entries = await getNotes();
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? META.SITE_URL);
+const ogImageUrl = new URL("/og.png", Astro.site ?? META.SITE_URL);
 ---
 
 <!doctype html>
@@ -26,8 +21,25 @@ const entries = await getNotes();
 		<meta name="viewport" content="width=device-width" />
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />
+		<link rel="canonical" href={canonicalUrl} />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content={META.TITLE} />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:image" content={ogImageUrl} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content="Today I Learned — a daily field notebook by Owais" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={pageTitle} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImageUrl} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="alternate" type="application/rss+xml" title="Today I Learned RSS" href="/rss.xml" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="stylesheet" href="/pagefind/pagefind-component-ui.css" />
+		<script is:inline src="/pagefind/pagefind-component-ui.js" type="module"></script>
 		<title>{pageTitle}</title>
 		<script is:inline>
 			try {
@@ -40,14 +52,62 @@ const entries = await getNotes();
 	<body>
 		<a class="skip-link" href="#content">Skip to content</a>
 		<div class="site-frame">
-			<div class="site-rail">
+			<div class="mobile-bar" data-pagefind-ignore>
+				<a class="mobile-bar__brand" href="/">TIL</a>
+				<button class="rail-toggle" type="button" aria-controls="site-rail" aria-expanded="false" data-rail-toggle>
+					<span class="rail-toggle__label">Menu</span>
+					<span class="rail-toggle__icons" aria-hidden="true">
+						<svg class="rail-toggle__icon rail-toggle__icon--menu" viewBox="0 0 24 24" width="20" height="20">
+							<path
+								d="M4 7h16M4 12h16M4 17h16"
+								fill="none"
+								stroke="currentColor"
+								stroke-linecap="round"
+								stroke-width="1.75"></path>
+						</svg>
+						<svg class="rail-toggle__icon rail-toggle__icon--close" viewBox="0 0 24 24" width="20" height="20">
+							<path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.75"
+							></path>
+						</svg>
+					</span>
+				</button>
+			</div>
+			<button class="rail-scrim" type="button" aria-label="Close menu" tabindex="-1" data-rail-scrim></button>
+			<aside class="site-rail" id="site-rail" data-site-rail data-pagefind-ignore>
 				<SiteHeader entries={entries} currentId={currentId} />
 				<SiteFooter />
-			</div>
-			<main class="site-main" id="content">
+			</aside>
+			<main class="site-main" id="content" data-pagefind-body>
 				<slot />
 			</main>
 		</div>
+		<script>
+			const rail = document.querySelector("[data-site-rail]");
+			const toggle = document.querySelector("[data-rail-toggle]");
+			const scrim = document.querySelector("[data-rail-scrim]");
+			const desktop = window.matchMedia("(min-width: 60rem)");
+
+			if (rail instanceof HTMLElement && toggle instanceof HTMLButtonElement && scrim instanceof HTMLButtonElement) {
+				const setOpen = (open: boolean, restoreFocus = false) => {
+					document.documentElement.classList.toggle("rail-is-open", open);
+					toggle.setAttribute("aria-expanded", String(open));
+					rail.inert = !desktop.matches && !open;
+					if (restoreFocus) toggle.focus();
+				};
+
+				const syncViewport = () => setOpen(false);
+				syncViewport();
+				desktop.addEventListener("change", syncViewport);
+				toggle.addEventListener("click", () => setOpen(toggle.getAttribute("aria-expanded") !== "true"));
+				scrim.addEventListener("click", () => setOpen(false, true));
+				rail.addEventListener("click", (event) => {
+					if (!desktop.matches && event.target instanceof HTMLAnchorElement) setOpen(false);
+				});
+				document.addEventListener("keydown", (event) => {
+					if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") setOpen(false, true);
+				});
+			}
+		</script>
 	</body>
 </html>
 
@@ -57,24 +117,133 @@ const entries = await getNotes();
 		--site-main-gutter: clamp(var(--space-6), 5vw, var(--space-16));
 
 		min-height: 100vh;
-		display: grid;
-		grid-template-areas:
-			"main"
-			"rail";
 	}
 
 	.site-main {
-		grid-area: main;
 		min-width: 0;
-		padding: var(--space-12);
+		padding: calc(4rem + var(--space-8)) clamp(var(--space-4), 5vw, var(--space-8)) var(--space-12);
 	}
 
 	.site-rail {
-		grid-area: rail;
+		position: fixed;
+		inset: 0 auto 0 0;
+		z-index: 4;
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-10);
-		border-top: 1px solid var(--color-border);
+		width: min(88vw, 25rem);
+		padding-top: 4rem;
+		border-right: 1px solid var(--color-border);
+		background: var(--color-bg);
+		box-shadow: 1rem 0 3rem var(--color-shadow);
+		overflow-y: auto;
+		transform: translateX(calc(-100% - 1rem));
+		transition: transform 240ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.mobile-bar {
+		position: fixed;
+		inset: 0 0 auto;
+		z-index: 6;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		height: 4rem;
+		padding-inline: var(--space-4);
+		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+		background: color-mix(in srgb, var(--color-bg) 90%, transparent);
+		box-shadow: 0 0.5rem 1.5rem color-mix(in srgb, var(--color-shadow) 45%, transparent);
+		backdrop-filter: blur(1rem);
+		font-family: var(--font-sans);
+	}
+
+	.mobile-bar__brand {
+		font-family: var(--font-serif);
+		font-size: var(--text-lg);
+		font-weight: 500;
+		letter-spacing: -0.025em;
+		text-decoration: none;
+	}
+
+	.rail-toggle {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		min-width: 5.75rem;
+		min-height: 2.5rem;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font-size: var(--text-sm);
+		font-weight: 500;
+		cursor: pointer;
+		transition-property: scale, border-color, background-color;
+		transition-duration: 150ms;
+		transition-timing-function: ease-out;
+	}
+
+	.rail-toggle:hover {
+		border-color: var(--color-accent);
+	}
+
+	.rail-toggle:active {
+		scale: 0.96;
+	}
+
+	.rail-toggle__icons {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	.rail-toggle__icon {
+		grid-area: 1 / 1;
+		transition-property: scale, opacity, filter;
+		transition-duration: 300ms;
+		transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.rail-toggle__icon--close,
+	.rail-is-open .rail-toggle__icon--menu {
+		scale: 0.25;
+		opacity: 0;
+		filter: blur(4px);
+	}
+
+	.rail-toggle__icon--menu,
+	.rail-is-open .rail-toggle__icon--close {
+		scale: 1;
+		opacity: 1;
+		filter: blur(0);
+	}
+
+	.rail-scrim {
+		position: fixed;
+		inset: 0;
+		z-index: 3;
+		border: 0;
+		background: rgb(0 0 0 / 52%);
+		opacity: 0;
+		pointer-events: none;
+		cursor: pointer;
+		transition: opacity 180ms ease-out;
+	}
+
+	.rail-is-open {
+		overflow: hidden;
+	}
+
+	.rail-is-open .site-rail {
+		transform: translateX(0);
+	}
+
+	.rail-is-open .rail-scrim {
+		opacity: 1;
+		pointer-events: auto;
 	}
 
 	@media (min-width: 60rem) {
@@ -83,20 +252,33 @@ const entries = await getNotes();
 		}
 
 		.site-rail {
-			position: fixed;
-			inset: 0 auto 0 0;
 			z-index: 1;
 			width: var(--site-rail-width);
-			gap: var(--space-8);
-			border-top: 0;
-			border-right: 1px solid var(--color-border);
-			overflow-y: auto;
+			padding-top: 0;
+			box-shadow: none;
+			transform: none;
+			transition: none;
 		}
 
 		.site-main {
 			width: min(calc(100vw - var(--site-rail-width)), calc(80ch + 2 * var(--site-main-gutter)));
 			margin-left: var(--site-rail-width);
 			padding-block: var(--space-12);
+		}
+
+		.mobile-bar,
+		.rail-scrim {
+			display: none;
+		}
+
+		.rail-is-open {
+			overflow: auto;
+		}
+	}
+
+	@media (max-width: 32rem) {
+		.site-main {
+			padding-top: calc(4rem + var(--space-6));
 		}
 	}
 </style>

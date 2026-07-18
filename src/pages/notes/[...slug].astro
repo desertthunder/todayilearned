@@ -1,9 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import EntryMeta from "../components/EntryMeta.astro";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { renderTilMarkdown } from "../lib/markdown";
-import { dateFromId, excerptFor, formatDate, getNotes, hrefFor } from "../lib/til";
+import EntryMeta from "../../components/EntryMeta.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { renderTilMarkdown } from "../../lib/markdown";
+import { dateFromId, excerptFor, formatDate, getNotes, hrefFor } from "../../lib/til";
 
 export async function getStaticPaths() {
 	const entries = await getNotes();
@@ -173,6 +173,11 @@ const related = (await getNotes())
 		font-size: 0.67em;
 		font-weight: 600;
 		text-decoration: none;
+	}
+
+	.til-entry__content [data-footnotes] {
+		font-size: var(--text-sm);
+		line-height: 1.55;
 	}
 
 	.entry-footer {

@@ -35,7 +35,7 @@ export async function getNotes(): Promise<NoteEntry[]> {
 }
 
 export function hrefFor(entry: NoteEntry): string {
-	return `/${entry.id}/`;
+	return `/notes/${entry.id}/`;
 }
 
 export function sourceHrefFor(entry: NoteEntry): string {
