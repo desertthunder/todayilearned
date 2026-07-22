@@ -14,7 +14,7 @@ type Props = { entry: CollectionEntry<"til"> };
 
 const { entry } = Astro.props;
 const date = dateFromId(entry.id)!;
-const content = renderTilMarkdown(entry.body ?? "");
+const content = renderTilMarkdown(entry.body ?? "", entry.id);
 const related = (await getNotes())
 	.filter((candidate) => {
 		if (candidate.id === entry.id) return false;
