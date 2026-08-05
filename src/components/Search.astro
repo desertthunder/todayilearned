@@ -6,6 +6,9 @@
 			<path d="m16 16 4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.75"></path>
 		</svg>
 		<input type="search" aria-label="Search notes" placeholder="Search available after build" disabled />
+		<span class="site-search__shortcut" aria-hidden="true">
+			<span class="site-search__shortcut-key">/</span>
+		</span>
 	</div>
 	<pagefind-config excerpt-length="18"></pagefind-config>
 	<pagefind-searchbox placeholder="Search the notebook…" max-results="6" show-sub-results shortcut="/"
@@ -62,6 +65,7 @@
 	}
 
 	.site-search__fallback {
+		position: relative;
 		display: flex;
 		align-items: center;
 		gap: var(--space-2);
@@ -81,6 +85,7 @@
 	.site-search__fallback input {
 		width: 100%;
 		min-width: 0;
+		padding-right: 2.5rem;
 		border: 0;
 		background: transparent;
 		color: var(--color-muted);
@@ -95,6 +100,46 @@
 	.site-search__fallback input::placeholder {
 		color: var(--color-muted);
 		opacity: 1;
+	}
+
+	.site-search__shortcut {
+		position: absolute;
+		inset-inline-end: var(--space-3);
+		top: 50%;
+		display: inline-flex;
+		align-items: center;
+		transform: translateY(-50%);
+		pointer-events: none;
+	}
+
+	.site-search__shortcut-key {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.25rem;
+		height: 1.125rem;
+		padding: 0;
+		border: 1px solid var(--color-border);
+		border-radius: 0.25rem;
+		background: var(--color-selection);
+		color: transparent;
+		font-size: 0;
+	}
+
+	:global(.site-search pagefind-searchbox .pf-trigger-key) {
+		padding: 0 !important;
+		color: transparent !important;
+		font-size: 0 !important;
+	}
+
+	.site-search__shortcut-key::before,
+	:global(.site-search pagefind-searchbox .pf-trigger-key)::before {
+		width: 1px;
+		height: 0.75rem;
+		border-radius: 999px;
+		background: var(--pf-text-secondary);
+		content: "";
+		transform: rotate(18deg);
 	}
 
 	.site-search pagefind-searchbox {

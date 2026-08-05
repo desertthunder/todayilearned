@@ -25,7 +25,10 @@ const related = (await getNotes())
 
 <BaseLayout title={entry.data.title} description={excerptFor(entry)} currentId={entry.id}>
 	<article class="til-entry">
-		<a class="back-link" href="/#latest"><span aria-hidden="true">←</span> Back to the log</a>
+		<a class="back-link" href="/#latest">
+			<span aria-hidden="true">←</span>
+			<span class="back-link__label">Back to the log</span>
+		</a>
 		<header class="til-entry__header">
 			<p class="til-entry__meta">
 				<time datetime={date.toISOString()}>{formatDate(date)}</time>
@@ -78,7 +81,20 @@ const related = (await getNotes())
 		font-family: var(--font-sans);
 		font-size: var(--text-sm);
 		font-weight: 500;
+		text-decoration: none;
+	}
+
+	.back-link__label {
+		text-decoration-line: underline;
+		text-decoration-color: var(--color-accent);
 		text-decoration-style: dashed;
+		text-decoration-thickness: 0.08em;
+		text-underline-offset: 0.18em;
+		transition: text-decoration-color var(--transition-fast);
+	}
+
+	.back-link:hover .back-link__label {
+		text-decoration-color: currentColor;
 	}
 
 	.til-entry__header {
