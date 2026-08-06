@@ -23,6 +23,7 @@
 		"@fontsource-variable/ibm-plex-sans": "^5.2.8",
 		"@fontsource/ibm-plex-serif": "^5.2.7",
 		"astro": "^7.1.1",
+		"katex": "^0.18.1",
 		"react": "^19.2.7",
 		"satteri": "^0.9.5",
 		"takumi-js": "^2.2.3",

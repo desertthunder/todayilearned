@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { posix, resolve } from "node:path";
-import { defineMdastPlugin, markdownToHtml } from "satteri";
+import katex from "katex";
+import { defineHastPlugin, defineMdastPlugin, markdownToHtml } from "satteri";
 
 const remoteTilUrl = "https://raw.githubusercontent.com/desertthunder/til/main/";
 
@@ -54,11 +55,44 @@ function tilImages(noteId: string) {
 	});
 }
 
+function hasClass(node: { properties?: Record<string, unknown> }, name: string): boolean {
+	const className = node.properties?.className;
+	return Array.isArray(className) ? className.includes(name) : className === name;
+}
+
+const tilMath = defineHastPlugin({
+	name: "til-math",
+	element: [
+		{
+			filter: ["pre"],
+			visit(node, context) {
+				const code = node.children[0];
+				if (code?.type !== "element" || !hasClass(code, "math-display")) return;
+
+				context.replaceNode(node, {
+					type: "raw",
+					value: katex.renderToString(context.textContent(code), { displayMode: true }),
+				});
+			},
+		},
+		{
+			filter: ["code"],
+			visit(node, context) {
+				if (!hasClass(node, "math-inline")) return;
+
+				context.replaceNode(node, { type: "raw", value: katex.renderToString(context.textContent(node)) });
+			},
+		},
+	],
+});
+
 export function renderTilMarkdown(markdown: string, noteId: string): string {
 	return markdownToHtml(markdown, {
 		features: {
 			gfm: { footnotes: { label: "References", backContent: "↩", backLabel: "Back to reference {reference}" } },
+			math: true,
 		},
 		mdastPlugins: [tilLinks, tilImages(noteId)],
+		hastPlugins: [tilMath],
 	}).html;
 }
