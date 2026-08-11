@@ -1,4 +1,6 @@
 ---
+import { topicHrefFor, topicLabel } from "../lib/til";
+
 interface Props {
 	tags: string[];
 }
@@ -10,7 +12,9 @@ const { tags } = Astro.props;
 	tags.length > 0 && (
 		<ul class="tag-list" aria-label="Topics">
 			{tags.map((tag) => (
-				<li class="tag-list__item">{tag}</li>
+				<li class="tag-list__item">
+					<a href={topicHrefFor(tag)}>{topicLabel(tag)}</a>
+				</li>
 			))}
 		</ul>
 	)
@@ -32,6 +36,10 @@ const { tags } = Astro.props;
 
 	.tag-list__item {
 		line-height: 1.4;
+	}
+
+	.tag-list a {
+		text-decoration-style: dotted;
 	}
 
 	.tag-list__item + .tag-list__item::before {

@@ -3,6 +3,17 @@ import { META } from "./meta";
 
 export type NoteEntry = CollectionEntry<"til">;
 
+export interface NoteDayGroup {
+	date: Date;
+	entries: NoteEntry[];
+}
+
+export interface NoteMonthGroup {
+	date: Date;
+	entries: NoteEntry[];
+	days: NoteDayGroup[];
+}
+
 const datePath = /^(\d{4})\/(\d{2})\/(\d{2})\/.+$/;
 
 export function dateFromId(id: string): Date | undefined {
@@ -38,6 +49,27 @@ export function hrefFor(entry: NoteEntry): string {
 	return `/notes/${entry.id}/`;
 }
 
+export function topicHrefFor(tag: string): string {
+	return `/topics/${encodeURIComponent(tag)}/`;
+}
+
+const topicLabelOverrides: Record<string, string> = {
+	atproto: "AT Protocol",
+	"new-york-yankees": "New York Yankees",
+	react: "React",
+	"soren-kierkegaard": "Søren Kierkegaard",
+};
+
+export function topicLabel(tag: string): string {
+	return (
+		topicLabelOverrides[tag] ??
+		tag
+			.split("-")
+			.map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+			.join(" ")
+	);
+}
+
 export function sourceHrefFor(entry: NoteEntry): string {
 	return `${META.REPO_URL}/blob/main/${entry.id}.md`;
 }
@@ -50,6 +82,43 @@ export function formatDate(date: Date, options: Intl.DateTimeFormatOptions = {})
 		timeZone: "UTC",
 		...options,
 	}).format(date);
+}
+
+export function formatMonth(date: Date): string {
+	return new Intl.DateTimeFormat("en", { month: "long", year: "numeric", timeZone: "UTC" }).format(date);
+}
+
+export function groupNotesByMonth(entries: NoteEntry[]): NoteMonthGroup[] {
+	const months = new Map<string, NoteMonthGroup>();
+
+	for (const entry of entries) {
+		const date = dateFromId(entry.id);
+		if (!date) continue;
+
+		const monthKey = `${date.getUTCFullYear()}-${date.getUTCMonth()}`;
+		const dayKey = `${monthKey}-${date.getUTCDate()}`;
+		let month = months.get(monthKey);
+
+		if (!month) {
+			month = { date, entries: [], days: [] };
+			months.set(monthKey, month);
+		}
+
+		month.entries.push(entry);
+		let day = month.days.find((candidate) => {
+			const candidateKey = `${candidate.date.getUTCFullYear()}-${candidate.date.getUTCMonth()}-${candidate.date.getUTCDate()}`;
+			return candidateKey === dayKey;
+		});
+
+		if (!day) {
+			day = { date, entries: [] };
+			month.days.push(day);
+		}
+
+		day.entries.push(entry);
+	}
+
+	return [...months.values()];
 }
 
 export function excerptFor(entry: NoteEntry): string {

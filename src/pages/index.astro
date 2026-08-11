@@ -1,9 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import TilList from "../components/TilList.astro";
-import { getNotes } from "../lib/til";
+import { getNotes, tagCounts, topicHrefFor, topicLabel } from "../lib/til";
 
 const entries = await getNotes();
+const recurringTopics = tagCounts(entries)
+	.filter(({ count }) => count > 1)
+	.slice(0, 5);
 ---
 
 <BaseLayout>
@@ -20,6 +23,22 @@ const entries = await getNotes();
 				</span>
 			</div>
 		</header>
+		<nav class="topic-browse" aria-labelledby="topic-browse-title">
+			<p class="topic-browse__label" id="topic-browse-title">Browse topics</p>
+			<ul>
+				<li><a href="#latest">All</a></li>
+				{
+					recurringTopics.map(({ tag, count }) => (
+						<li>
+							<a href={topicHrefFor(tag)}>
+								{topicLabel(tag)} <span>{count}</span>
+							</a>
+						</li>
+					))
+				}
+				<li><a href="/topics/">More topics</a></li>
+			</ul>
+		</nav>
 
 		<section class="archive-section" id="latest" aria-label="Recent notes">
 			<TilList entries={entries} />
@@ -53,5 +72,47 @@ const entries = await getNotes();
 
 	.archive-section {
 		padding-top: var(--space-8);
+	}
+
+	.topic-browse {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: var(--space-4) var(--space-6);
+		padding-block: var(--space-5);
+		border-bottom: 1px solid var(--color-border);
+		font-family: var(--font-sans);
+		font-size: var(--text-sm);
+	}
+
+	.topic-browse__label {
+		color: var(--color-muted);
+		font-size: var(--text-xs);
+		font-weight: 500;
+		letter-spacing: var(--tracking-caps);
+		text-transform: uppercase;
+	}
+
+	.topic-browse ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2) var(--space-5);
+		list-style: none;
+	}
+
+	.topic-browse a {
+		text-decoration-style: dotted;
+	}
+
+	.topic-browse a span {
+		margin-left: 0.15em;
+		color: var(--color-muted);
+		font-size: var(--text-xs);
+		font-variant-numeric: tabular-nums;
+	}
+
+	@media (max-width: 38rem) {
+		.topic-browse {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>
