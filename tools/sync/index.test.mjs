@@ -57,6 +57,7 @@ Read [the reference](https://example.com).[^1]
 	assert.equal(record.publishedAt, "2026-07-15T00:00:00.000Z");
 	assert.equal(record.content.text.markdown, rawMarkdown);
 	assert.equal(record.content.$type, "at.markpub.markdown");
+	assert.deepEqual(record.content.extensions, ["YAML"]);
 	assert.equal(record.textContent, "PageRank Read the reference. Source.");
 	assert.deepEqual(record.tags, ["search"]);
 });
@@ -66,6 +67,18 @@ test("Markdown conversion removes formatting without removing its words", () => 
 		markdownToPlainText("## Heading\n\n- **Bold** and `code`\n\n> [Link](https://example.com)"),
 		"Heading Bold and code Link",
 	);
+});
+
+test("document records declare wikilinks and use their visible text", () => {
+	const record = buildDocumentRecord({
+		id: "2026/08/23/example",
+		rawMarkdown: "---\ntitle: Example\n---\n\nRead [[vectors|the vector note]].\n",
+		body: "Read [[vectors|the vector note]].\n",
+		frontmatter: { title: "Example" },
+	});
+
+	assert.deepEqual(record.content.extensions, ["YAML", "Wikilinks"]);
+	assert.equal(record.textContent, "Read the vector note.");
 });
 
 test("document records reject malformed frontmatter", () => {

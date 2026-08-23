@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { posix, resolve } from "node:path";
 import katex from "katex";
 import { defineHastPlugin, defineMdastPlugin, markdownToHtml } from "satteri";
+import { wikilinks } from "./wikilinks.mjs";
 
 const remoteTilUrl = "https://raw.githubusercontent.com/desertthunder/til/main/";
 
@@ -86,13 +87,13 @@ const tilMath = defineHastPlugin({
 	],
 });
 
-export function renderTilMarkdown(markdown: string, noteId: string): string {
+export function renderTilMarkdown(markdown: string, noteId: string, noteIds: string[]): string {
 	return markdownToHtml(markdown, {
 		features: {
 			gfm: { footnotes: { label: "References", backContent: "↩", backLabel: "Back to reference {reference}" } },
 			math: true,
 		},
-		mdastPlugins: [tilLinks, tilImages(noteId)],
+		mdastPlugins: [wikilinks(noteIds, noteId), tilLinks, tilImages(noteId)],
 		hastPlugins: [tilMath],
 	}).html;
 }

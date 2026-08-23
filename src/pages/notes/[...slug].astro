@@ -9,14 +9,15 @@ import { dateFromId, excerptFor, formatDate, getNotes, hrefFor } from "../../lib
 
 export async function getStaticPaths() {
 	const entries = await getNotes();
-	return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+	const noteIds = entries.map((entry) => entry.id);
+	return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry, noteIds } }));
 }
 
-type Props = { entry: CollectionEntry<"til"> };
+type Props = { entry: CollectionEntry<"til">; noteIds: string[] };
 
-const { entry } = Astro.props;
+const { entry, noteIds } = Astro.props;
 const date = dateFromId(entry.id)!;
-const content = renderTilMarkdown(entry.body ?? "", entry.id);
+const content = renderTilMarkdown(entry.body ?? "", entry.id, noteIds);
 const related = (await getNotes())
 	.filter((candidate) => {
 		if (candidate.id === entry.id) return false;

@@ -9,6 +9,7 @@ import {
 	standardSiteDocumentRkey,
 	standardSiteDocumentUri,
 } from "../../src/lib/standard-site.mjs";
+import { hasWikilinks, wikilinksToPlainText } from "../../src/lib/wikilinks.mjs";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const projectDirectory = resolve(scriptDirectory, "../..");
@@ -42,7 +43,7 @@ async function listMarkdownFiles(directory) {
  * @returns {string}
  */
 export function markdownToPlainText(markdown) {
-	return markdown
+	return wikilinksToPlainText(markdown)
 		.replace(/^```[^\n]*\n?/gm, "")
 		.replace(/^~~~[^\n]*\n?/gm, "")
 		.replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
@@ -117,7 +118,7 @@ export function buildDocumentRecord(note) {
 			$type: "at.markpub.markdown",
 			flavor: "gfm",
 			renderingRules: "satteri",
-			extensions: ["YAML"],
+			extensions: hasWikilinks(note.body) ? ["YAML", "Wikilinks"] : ["YAML"],
 			text: { $type: "at.markpub.text", markdown: note.rawMarkdown },
 		},
 		textContent,
